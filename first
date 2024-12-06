@@ -1,9 +1,0 @@
-struct Ride {
-    char start[50];      // 출발지
-    char destination[50]; // 도착지
-    float distance;       // 거리 (km)
-    float fare;           // 요금
-};
-
-struct Ride rides[100];  // 최대 100개의 운행 기록 저장
-int rideCount = 0;    
