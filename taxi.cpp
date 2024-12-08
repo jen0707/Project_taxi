@@ -1,58 +1,68 @@
 #include <stdio.h>
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
-int grade;
+int grade, status, distance;
 char departure[50], arrival[50];
 
 void taxi_grade(void) {
-    printf("ÅÃ½Ã µî±ŞÀ» ¼±ÅÃÇÏ½Ã¿À(¹øÈ£ ÀÔ·Â)\n1.ÁßÇüÅÃ½Ã\n2.´ëÇü½Â¿ë ¹× ¸ğ¹üÅÃ½Ã\n3.°í±ŞÅÃ½Ã\n4.´ëÇü½ÂÇÕÅÃ½Ã\n");
-    scanf_s("%d", &grade);  // & ¿¬»êÀÚ Ãß°¡
+    printf("íƒì‹œ ë“±ê¸‰ì„ ì„ íƒí•˜ì‹œì˜¤(ë²ˆí˜¸ ì…ë ¥)\n1.ì¤‘í˜•íƒì‹œ\n2.ëŒ€í˜•ìŠ¹ìš© ë° ëª¨ë²”íƒì‹œ\n3.ê³ ê¸‰íƒì‹œ\n4.ëŒ€í˜•ìŠ¹í•©íƒì‹œ\n");
+    scanf_s("%d", &grade);  // & ì—°ì‚°ì ì¶”ê°€
     switch (grade) {
     case 1:
-        printf("ÁßÇüÅÃ½Ã¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n");
+        printf("ì¤‘í˜•íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
         break;
     case 2:
-        printf("´ëÇü½Â¿ë ¹× ¸ğ¹üÅÃ½Ã¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n");
+        printf("ëŒ€í˜•ìŠ¹ìš© ë° ëª¨ë²”íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
         break;
     case 3:
-        printf("°í±ŞÅÃ½Ã¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n");
+        printf("ê³ ê¸‰íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
         break;
     case 4:
-        printf("´ëÇü½ÂÇÕÅÃ½Ã¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n");
+        printf("ëŒ€í˜•ìŠ¹í•©íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
         break;
     default:
-        printf("Àß¸ø ÀÔ·ÂÇÏ¼Ì½À´Ï´Ù.\n");
-        taxi_grade();  // Àç±Í È£Ãâ ½Ã °ıÈ£ Ãß°¡
+        printf("ì˜ëª» ì…ë ¥í•˜ì…¨ìŠµë‹ˆë‹¤.\n");
+        taxi_grade();  // ì¬ê·€ í˜¸ì¶œ ì‹œ ê´„í˜¸ ì¶”ê°€
         break;
     }
 }
-// time¿¡¼­ ½Ã°£´ë Á¤º¸ ºÒ·¯¿À±â
-extern const char* getTimeZone();
+// timeì—ì„œ ì‹œê°„ëŒ€ ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°
+extern const char* getTimeZone(int* status);
 
 int timeline() {
-    const char* timeZone = getTimeZone();
-    printf("ÇöÀç ½Ã°£´ë´Â '%s'ÀÔ´Ï´Ù.\n", timeZone);
-    return 0;
+    int timeStatus;
+    const char* timeZone = getTimeZone(&timeStatus);
+    printf("í˜„ì¬ ì‹œê°„ëŒ€ëŠ” '%s'ì…ë‹ˆë‹¤. (timeStatus: %d)\n", timeZone, timeStatus);
+    return timeStatus;
 }
 
 void place(void) {
-        printf("Ãâ¹ßÁö¿Í µµÂøÁö¸¦ ÀÔ·ÂÇÏ¼¼¿ä: ");
+    printf("ì¶œë°œì§€ì™€ ë„ì°©ì§€ë¥¼ ì…ë ¥í•˜ì„¸ìš”: ");
 
-        // scanf_s¸¦ »ç¿ëÇØ ¾ÈÀüÇÏ°Ô ÀÔ·Â
-        if (scanf_s("%49s %49s", departure, (unsigned)_countof(departure), arrival, (unsigned)_countof(arrival)) != 2) {
-            printf("ÀÔ·ÂÀÌ Àß¸øµÇ¾ú½À´Ï´Ù. ´Ù½Ã ½ÃµµÇÏ¼¼¿ä.\n");
-            return;
-        }
-
-        printf("Ãâ¹ßÁö: %s, µµÂøÁö: %s\n", departure, arrival);
+    // scanf_së¥¼ ì‚¬ìš©í•´ ì•ˆì „í•˜ê²Œ ì…ë ¥
+    if (scanf_s("%49s %49s", departure, (unsigned)_countof(departure), arrival, (unsigned)_countof(arrival)) != 2) {
+        printf("ì…ë ¥ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹œë„í•˜ì„¸ìš”.\n");
+        return;
     }
 
+    printf("ì¶œë°œì§€: %s, ë„ì°©ì§€: %s\n", departure, arrival);
+}
+
+extern float Cost(int grade, int status, float distance);
+
+int cost() {
+    int taxi_cost;
+    float cost = Cost(grade, status, distance);
+    printf("ìµœì¢… ìš”ê¸ˆì€ %.0fì›ì…ë‹ˆë‹¤.\n", cost);
+    return 0;
+}
 
 int main()
 {
-    taxi_grade(); // ÇÔ¼ö È£Ãâ ½Ã °ıÈ£ Ãß°¡
+    taxi_grade(); // í•¨ìˆ˜ í˜¸ì¶œ ì‹œ ê´„í˜¸ ì¶”ê°€
     timeline();
     place();
-    
+    cost();
+
     return 0;
 }
