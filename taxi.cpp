@@ -1,69 +1,135 @@
-ï»¿#include <stdio.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #define _countof(array) (sizeof(array) / sizeof(array[0]))
 
-int grade;
+// Àü¿ª º¯¼ö
+int grade, status;
+float distance;
 char departure[50], arrival[50];
 
-void taxi_grade(void) {
-    printf("íƒì‹œ ë“±ê¸‰ì„ ì„ íƒí•˜ì‹œì˜¤(ë²ˆí˜¸ ìž…ë ¥)\n1.ì¤‘í˜•íƒì‹œ\n2.ëŒ€í˜•ìŠ¹ìš© ë° ëª¨ë²”íƒì‹œ\n3.ê³ ê¸‰íƒì‹œ\n4.ëŒ€í˜•ìŠ¹í•©íƒì‹œ\n");
-    scanf_s("%d", &grade);  // & ì—°ì‚°ìž ì¶”ê°€
-    switch (grade) {
-    case 1:
-        printf("ì¤‘í˜•íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
-        break;
-    case 2:
-        printf("ëŒ€í˜•ìŠ¹ìš© ë° ëª¨ë²”íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
-        break;
-    case 3:
-        printf("ê³ ê¸‰íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
-        break;
-    case 4:
-        printf("ëŒ€í˜•ìŠ¹í•©íƒì‹œë¥¼ ì„ íƒí•˜ì…¨ìŠµë‹ˆë‹¤.\n");
-        break;
-    default:
-        printf("ìž˜ëª» ìž…ë ¥í•˜ì…¨ìŠµë‹ˆë‹¤.\n");
-        taxi_grade();  // ìž¬ê·€ í˜¸ì¶œ ì‹œ ê´„í˜¸ ì¶”ê°€
-        break;
-    }
-}
-// timeì—ì„œ ì‹œê°„ëŒ€ ì •ë³´ ë¶ˆëŸ¬ì˜¤ê¸°
+// µ¥ÀÌÅÍ ÀúÀå ¹× ·Îµå ±â´ÉÀ» À§ÇÑ ±¸Á¶Ã¼ ¼±¾ð
+struct TaxiData {
+    char start[50];
+    char destination[50];
+    double fare;
+};
+
+// ¿ÜºÎ ÇÔ¼ö ¼±¾ð
+extern void saveData(const TaxiData* data);
+extern int loadData(TaxiData* data);
+extern float Cost(int grade, int status, float distance);
 extern const char* getTimeZone(int* status);
 
+// ÅÃ½Ã µî±Þ ¼±ÅÃ ÇÔ¼ö
+void taxi_grade(void) {
+    printf("ÅÃ½Ã µî±ÞÀ» ¼±ÅÃÇÏ½Ã¿À(¹øÈ£ ÀÔ·Â)\n1. ÁßÇüÅÃ½Ã\n2. ´ëÇü½Â¿ë ¹× ¸ð¹üÅÃ½Ã\n3. °í±ÞÅÃ½Ã\n4. ´ëÇü½ÂÇÕÅÃ½Ã\n");
+    while (1) {
+        scanf_s("%d", &grade);
+        if (grade >= 1 && grade <= 4) {
+            const char* grades[] = { "ÁßÇüÅÃ½Ã", "´ëÇü½Â¿ë ¹× ¸ð¹üÅÃ½Ã", "°í±ÞÅÃ½Ã", "´ëÇü½ÂÇÕÅÃ½Ã" };
+            printf("%s¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n", grades[grade - 1]);
+            break;
+        }
+        else {
+            printf("Àß¸øµÈ ÀÔ·ÂÀÔ´Ï´Ù. ´Ù½Ã ÀÔ·ÂÇØÁÖ¼¼¿ä.\n");
+        }
+    }
+}
+
+// ½Ã°£´ë Á¤º¸ È®ÀÎ ÇÔ¼ö
 int timeline() {
     int timeStatus;
     const char* timeZone = getTimeZone(&timeStatus);
-    printf("í˜„ìž¬ ì‹œê°„ëŒ€ëŠ” '%s'ìž…ë‹ˆë‹¤. (timeStatus: %d)\n", timeZone, timeStatus);
+    printf("ÇöÀç ½Ã°£´ë´Â '%s'ÀÔ´Ï´Ù. (timeStatus: %d)\n", timeZone, timeStatus);
     return timeStatus;
 }
 
+// Ãâ¹ßÁö¿Í µµÂøÁö ÀÔ·Â ÇÔ¼ö
 void place(void) {
-    printf("ì¶œë°œì§€ì™€ ë„ì°©ì§€ë¥¼ ìž…ë ¥í•˜ì„¸ìš”: ");
-
-    // scanf_së¥¼ ì‚¬ìš©í•´ ì•ˆì „í•˜ê²Œ ìž…ë ¥
-    if (scanf_s("%49s %49s", departure, (unsigned)_countof(departure), arrival, (unsigned)_countof(arrival)) != 2) {
-        printf("ìž…ë ¥ì´ ìž˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤. ë‹¤ì‹œ ì‹œë„í•˜ì„¸ìš”.\n");
-        return;
+    printf("Ãâ¹ßÁö¿Í µµÂøÁö¸¦ ÀÔ·ÂÇÏ¼¼¿ä: ");
+    while (1) {
+        if (scanf_s("%49s %49s", departure, (unsigned)_countof(departure), arrival, (unsigned)_countof(arrival)) == 2) {
+            printf("Ãâ¹ßÁö: %s, µµÂøÁö: %s\n", departure, arrival);
+            break;
+        }
+        else {
+            printf("ÀÔ·ÂÀÌ Àß¸øµÇ¾ú½À´Ï´Ù. ´Ù½Ã ½ÃµµÇÏ¼¼¿ä.\n");
+            while (getchar() != '\n'); // ÀÔ·Â ¹öÆÛ ºñ¿ì±â
+        }
     }
-
-    printf("ì¶œë°œì§€: %s, ë„ì°©ì§€: %s\n", departure, arrival);
 }
 
-extern const float* calculateCost(float baseCost, float extraCostPerUnit, float distance);
+// ³×ÀÌ¹öÁöµµ ¸µÅ© »ý¼º ÇÔ¼ö
+void openDistanceURL(const char* start, const char* destination) {
+    char url[300];
+    snprintf(url, sizeof(url),
+        "https://map.naver.com/p/directions/-/-/-/car?c=15.00,0,0,0,dh",
+        start, destination);
+    printf("ºê¶ó¿ìÀú¸¦ ¿­¾î °Å¸®¸¦ È®ÀÎÇÏ¼¼¿ä: %s\n", url);
+    char command[350];  // ÃæºÐÈ÷ Å« ¹öÆÛ
+    snprintf(command, sizeof(command), "start %s", url);  // 'start' ¸í·É »ç¿ë
+    system(command);  // systemÀ» ÅëÇØ ºê¶ó¿ìÀú ¿­±â
+}
 
-int cost() {
-    int taxi_cost;
-    const char* cost = Cost(grade, status, distance);
-    float cost = Cost(grade, status, distance);
-    printf("ìµœì¢… ìš”ê¸ˆì€ %.0fì›ìž…ë‹ˆë‹¤.\n", cost);
+
+// ÅÃ½Ã ¿ä±Ý °è»ê ¹× Ãâ·Â ÇÔ¼ö
+float cost() {
+   
+    float cost = Cost(grade, status, (float)distance);
+
+    return cost;
+}
+
+int main() {
+    TaxiData data;
+
+    // ÀÌÀü µ¥ÀÌÅÍ ºÒ·¯¿ÃÁö ¿©ºÎ È®ÀÎ
+    int choice;
+    printf("ÀÌÀü¿¡ ÀúÀåµÈ µ¥ÀÌÅÍ¸¦ ºÒ·¯¿À½Ã°Ú½À´Ï±î?\n1. ³×\n2. ¾Æ´Ï¿À\n");
+    scanf_s("%d", &choice);
+
+    if (choice == 1) {
+        if (loadData(&data)) {
+            printf("ÀúÀåµÈ µ¥ÀÌÅÍ¸¦ ºÒ·¯¿Ô½À´Ï´Ù:\n");
+            printf("Ãâ¹ßÁö: %s, µµÂøÁö: %s, ¿ä±Ý: %.0f¿ø\n", data.start, data.destination, data.fare);
+        }
+        else {
+            printf("ÀúÀåµÈ µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù. »õ·Î¿î µ¥ÀÌÅÍ¸¦ ÀÔ·ÂÇÏ¼¼¿ä.\n");
+            taxi_grade();
+            status = timeline();
+            place();
+            data.fare = cost();
+        }
+    }
+    else if (choice == 2) {
+        printf("»õ·Î¿î µ¥ÀÌÅÍ¸¦ ÀÔ·ÂÇÏ¼¼¿ä.\n");
+        taxi_grade();
+        status = timeline();
+        place();
+
+        // °Å¸® È®ÀÎ ¹× ÀÔ·Â
+        openDistanceURL(departure, arrival);
+        printf("ºê¶ó¿ìÀú¿¡¼­ È®ÀÎÇÑ °Å¸®¸¦ km ´ÜÀ§·Î ÀÔ·ÂÇÏ¼¼¿ä: ");
+        scanf_s("%f", &distance);
+        printf("Ãâ¹ßÁö '%s'¿Í µµÂøÁö '%s'ÀÇ °Å¸®´Â %.2f kmÀÔ´Ï´Ù.\n", departure, arrival, distance);
+
+        //¿ä±Ý °è»ê
+        data.fare = cost();
+        float final_cost = Cost(grade, status, distance);
+        printf("ÃÖÁ¾ ¿ä±ÝÀº %.0f¿øÀÔ´Ï´Ù.\n", final_cost);
+    }
+    else {
+        printf("Àß¸øµÈ ÀÔ·ÂÀÔ´Ï´Ù. ÇÁ·Î±×·¥À» Á¾·áÇÕ´Ï´Ù.\n");
+        while (getchar() != '\n'); // ÀÔ·Â ¹öÆÛ ºñ¿ì±â
+        return 0;
+    }
     
-}
-
-int main()
-{
-    taxi_grade(); // í•¨ìˆ˜ í˜¸ì¶œ ì‹œ ê´„í˜¸ ì¶”ê°€
-    timeline();
-    place();
-    cost();
+    // µ¥ÀÌÅÍ ÀúÀå
+    strcpy_s(data.start, sizeof(data.start), departure);
+    strcpy_s(data.destination, sizeof(data.destination), arrival);
+    saveData(&data);
 
     return 0;
 }
